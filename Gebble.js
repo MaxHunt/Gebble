@@ -33,9 +33,10 @@ function init(opts){
 }
 
 //Get Values for Acelerometer
-function startDectection(e){
+function startDetection(e){
    var frameArray = [];
    frameArray = arrayToFrames(e);
+   console.log(options.delay);
    if (timeOfFrame===0||frameArray[0][0].time - timeOfFrame >= options.delay){
       var detection = detectGesture(frameArray);
       //frame of dectection
@@ -51,10 +52,10 @@ function startDectection(e){
 //Convert the arrays into frames, so they can be processed
 function arrayToFrames(e){
    var frameArray = [];
-	for ( var i=0; i<e.accels.length-1; i++){
-		frameArray.push([e.accels[i],e.accels[i+1]]);
-	}
-	return (frameArray);
+   for ( var i=0; i<e.accels.length-1; i++){
+      frameArray.push([e.accels[i],e.accels[i+1]]);
+   }
+   return (frameArray);
 }
 
 //function/algorithm that detects the gestures
@@ -97,3 +98,9 @@ function detectGesture(frameArray){
    }
    return(false);  
 }
+module.exports = {
+   init: init,
+   start: startDetection,
+   arrayToFrames: arrayToFrames,
+   detect: detectGesture   
+};
