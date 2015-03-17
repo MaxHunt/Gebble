@@ -21,8 +21,10 @@ var timeOfFrame = 0;
 var defaultTimeDifference = 3000;
 var defaultDebug = true;
 var options = null;
+//intialise AcellerometerLibary
+var Accel = require('ui/accel');
 
-
+//Create Libary Object
 function init(opts){
    options = opts || {}; 
    options.debug = opts.debug || defaultDebug;
@@ -32,24 +34,18 @@ function init(opts){
 
 //Get Values for Acelerometer
 function startDectection(e){
-      var frameArray = [];
-      frameArray = arrayToFrames(e);
-      if (timeOfFrame===0||frameArray[0][0].time - timeOfFrame >= options.delay){
-         var detection = detectGesture(frameArray);
-         //frame of dectection
-         if (detection[0]===true){
-            console.log(JSON.stringify(frameArray));
-         }
-            return(detection);   
+   var frameArray = [];
+   frameArray = arrayToFrames(e);
+   if (timeOfFrame===0||frameArray[0][0].time - timeOfFrame >= options.delay){
+      var detection = detectGesture(frameArray);
+      //frame of dectection
+      if (detection[0]===true){
+         if(options.debug){console.log(JSON.stringify(frameArray));}
+      }
+         Accel.config({subscribe: true}); 
+         return(detection);   
       } 
-      else{if(options.debug){ console.log("On time out");}}
-   }
-   else{
-      console.log("emptyfunction");
-      CountScreen.hide();
-      Accel.config({
-         subscribe: false
-      });     
+   else{if(options.debug){ console.log("On time out");}}    
 }
 
 //Convert the arrays into frames, so they can be processed
