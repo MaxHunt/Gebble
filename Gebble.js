@@ -41,25 +41,32 @@ function startDetection(e){
    var frameArray = [];
    maximumGestureLength();
    frameArray = arrayToFrames(e);
+   console.log("going to join");
    joinFrameArrays(frameArray);
+   console.log(JSON.stringify(stepArray));
    cachedFrameArray = frameArray;
    if (timeOfFrame===0||frameArray[0][0].time - timeOfFrame >= options.delay){
       var detection = detectGesture(frameArray);
+      var detectionJoin;
       //dectection over the joining of the previous Arrays
-      for ( var i=0; i>stepArray.length-1; i++){
-         var detectionJoin = detectGesture(stepArray[i]);
+   
+      for ( var i=0; i<stepArray.length-1; i++){
+         detectionJoin = detectGesture(stepArray[i]);
          if (detectionJoin[0]===true){
             if(options.debug){console.log(JSON.stringify(stepArray[i]));}
-         }
-         Accel.config({subscribe: true}); 
-         return(detectionJoin); 
+            break;
+         }          
+      }
+      Accel.config({subscribe: true});
+      if (detectionJoin[0]===true){
+         return detectionJoin;
       }
       //dectection over the frame array
       if (detection[0]===true){
          if(options.debug){console.log(JSON.stringify(frameArray));}
       }
          Accel.config({subscribe: true}); 
-         return(detection);   
+         return(detection);
    }
    else{
       if(options.debug){console.log("On time out");}
@@ -78,23 +85,26 @@ function arrayToFrames(e){
 
 //function to join to arrays together
 function joinFrameArrays(current){
-   var maxLengthGes = 0;
+   stepArray=[];
    if (cachedFrameArray === []){
-      if(options.debug){console.log("First FrameArray, no join needed");}
+      if(options.debug){console.log("First Frame Array, no join needed");}
    }
    else{
-      //Create the stepped Array
+      //Create the temp stepped Array
       var tempArray = [];
-      for (var i=maxLengthGes-1; i>0; i--){
+      for (var i=maxLengthGes-1; i>=0; i--){
          // adding the frames from previous counting up to the end for the right order
-         for(var j=0; j>=i; j++){
+         for(var j=0; j<i; j++){         
          tempArray.push(cachedFrameArray[cachedFrameArray.length-(i-j)]);
          }
          //Adding the frames 
-         for(j=maxLengthGes-1; j>=i; j++){
-            tempArray.push(current[j-i]);
+         for(j=0; j<maxLengthGes-i; j++){
+            console.log("currentFrame " + j);
+            tempArray.push(current[j]);
          }
+         //console.log("tempArray" + JSON.stringify(tempArray));
          stepArray.push(tempArray);
+         tempArray =[];
       }
       if(options.debug){console.log("stepArray completetd");}
    }
@@ -111,8 +121,8 @@ function maximumGestureLength(){
 }
 
 //function/algorithm that detects the gestures
-function detectGesture(frameArray){
-   for (var i=0, framelength = frameArray.length-maxLengthGes;  i<framelength; i++){
+function detectGesture(frameArray){ 
+   for (var i=0, framelength = frameArray.length-maxLengthGes;  i<=framelength; i++){
       if ((frameArray[i][0].vibe === true)||(frameArray[i][0].vibe === true)){
          if(options.debug){console.log("frame " + i + "failed" );}
       }
@@ -130,8 +140,7 @@ function detectGesture(frameArray){
                      if(options.debug){console.log("Last Dectection Frame: "+(i+j) );}
                      if(options.debug){console.log("Gesture Frame: "+j);}
                      if(options.debug){console.log("Detection on: " +options.gestures[k][0][0].name);}
-                     Accel.config({subscribe: false});                  
-                     //setTimeout(function() {return function () {Accel.config({subscribe: true});};}, 10000);                     
+                     Accel.config({subscribe: false});                                       
                      timeOfFrame = frameArray[i][0].time;
                      return [true,k];
                   }
@@ -145,6 +154,7 @@ function detectGesture(frameArray){
                   break;
                }
             }
+            
          }
       }      
    }
