@@ -23,7 +23,7 @@ var defaultDebug = true;
 var options = null;
 //intialise AcellerometerLibary
 var Accel = require('ui/accel');
-var cachedFrame =[];
+var cachedFrameArray =[];
 var stepArray = [];
 var maxLengthGes = 0;
 
@@ -42,26 +42,25 @@ function startDetection(e){
    maximumGestureLength();
    frameArray = arrayToFrames(e);
    joinFrameArrays(frameArray);
-   cachedFrame = frameArray;
+   cachedFrameArray = frameArray;
    if (timeOfFrame===0||frameArray[0][0].time - timeOfFrame >= options.delay){
       var detection = detectGesture(frameArray);
-      //frame of dectection
-      if (detection[0]===true){
-         if(options.debug){console.log(JSON.stringify(frameArray));}
-      }
-         Accel.config({subscribe: true}); 
-         return(detection);   
-      }
       //dectection over the joining of the previous Arrays
-      for (i=0; i>stepArray.length-1; i++){
+      for ( var i=0; i>stepArray.length-1; i++){
          var detectionJoin = detectGesture(stepArray[i]);
-         if (dectectionJoin[0]===true){
+         if (detectionJoin[0]===true){
             if(options.debug){console.log(JSON.stringify(stepArray[i]));}
          }
          Accel.config({subscribe: true}); 
          return(detectionJoin); 
       }
-
+      //dectection over the frame array
+      if (detection[0]===true){
+         if(options.debug){console.log(JSON.stringify(frameArray));}
+      }
+         Accel.config({subscribe: true}); 
+         return(detection);   
+   }
    else{
       if(options.debug){console.log("On time out");}
       return[false,-1];
@@ -78,21 +77,21 @@ function arrayToFrames(e){
 }
 
 //function to join to arrays together
-function joinFrames(current){
+function joinFrameArrays(current){
    var maxLengthGes = 0;
-   if (cachedFrame === []){
+   if (cachedFrameArray === []){
       if(options.debug){console.log("First FrameArray, no join needed");}
    }
    else{
       //Create the stepped Array
-      var tempArray = []
-      for (var i=maxLengthGes-1; i>0; i--;){
+      var tempArray = [];
+      for (var i=maxLengthGes-1; i>0; i--){
          // adding the frames from previous counting up to the end for the right order
          for(var j=0; j>=i; j++){
-         tempArray.push(previous[previous.length-(i-j);]
+         tempArray.push(cachedFrameArray[cachedFrameArray.length-(i-j)]);
          }
          //Adding the frames 
-         for(var j=maxLengthGes-1; j>=i; j++;){
+         for(j=maxLengthGes-1; j>=i; j++){
             tempArray.push(current[j-i]);
          }
          stepArray.push(tempArray);
@@ -113,10 +112,9 @@ function maximumGestureLength(){
 
 //function/algorithm that detects the gestures
 function detectGesture(frameArray){
-
    for (var i=0, framelength = frameArray.length-maxLengthGes;  i<framelength; i++){
       if ((frameArray[i][0].vibe === true)||(frameArray[i][0].vibe === true)){
-         if(options.de-bug){console.log("frame " + i + "failed" );}
+         if(options.debug){console.log("frame " + i + "failed" );}
       }
       else{
          //console.log("else");
