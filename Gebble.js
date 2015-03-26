@@ -35,7 +35,6 @@ function init(opts){
    options.gestures = opts.gestures || gesture;
 }
 
-
 //Get Values for Acelerometer
 function startDetection(e){
    var frameArray = [];
@@ -83,9 +82,10 @@ function arrayToFrames(e){
    return (frameArray);
 }
 
-//function to join to arrays together
+//function to join to arrays together, uses the cached and current arrays
 function joinFrameArrays(current){
    stepArray=[];
+   //if there is no previous cached array, the first time the app is started this process is voided
    if (cachedFrameArray === []){
       if(options.debug){console.log("First Frame Array, no join needed");}
    }
@@ -97,22 +97,21 @@ function joinFrameArrays(current){
          for(var j=0; j<i; j++){         
          tempArray.push(cachedFrameArray[cachedFrameArray.length-(i-j)]);
          }
-         //Adding the frames 
+         //Adding the frames from the current array
          for(j=0; j<maxLengthGes-i; j++){
-            console.log("currentFrame " + j);
             tempArray.push(current[j]);
          }
-         //console.log("tempArray" + JSON.stringify(tempArray));
+         //push this loops array to the stepArray
          stepArray.push(tempArray);
          tempArray =[];
       }
-      if(options.debug){console.log("stepArray completetd");}
+      if(options.debug){console.log("stepArray completeted");}
    }
-
 }
 
+//find maximum length gesture
 function maximumGestureLength(){
-   //find maximum length gesture
+   //loop over the getures array only taking the biggest overall array size
    for (var i=0, gesLength = options.gestures.length-1; i<gesLength; i++){
       if (options.gestures[i].length > maxLengthGes ){
          maxLengthGes=gesture[i].length;
