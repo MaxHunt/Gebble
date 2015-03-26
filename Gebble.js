@@ -23,6 +23,9 @@ var defaultDebug = true;
 var options = null;
 //intialise AcellerometerLibary
 var Accel = require('ui/accel');
+var cachedFrame =[];
+var stepArray = [];
+var maxLengthGes = 0;
 
 //Create Libary Object
 function init(opts){
@@ -32,10 +35,14 @@ function init(opts){
    options.gestures = opts.gestures || gesture;
 }
 
+
 //Get Values for Acelerometer
 function startDetection(e){
    var frameArray = [];
+   maximumGestureLength();
    frameArray = arrayToFrames(e);
+   joinFrameArrays(frameArray);
+   cachedFrame = frameArray;
    if (timeOfFrame===0||frameArray[0][0].time - timeOfFrame >= options.delay){
       var detection = detectGesture(frameArray);
       //frame of dectection
@@ -44,7 +51,17 @@ function startDetection(e){
       }
          Accel.config({subscribe: true}); 
          return(detection);   
-      } 
+      }
+      //dectection over the joining of the previous Arrays
+      for (i=0; i>stepArray.length-1; i++){
+         var detectionJoin = detectGesture(stepArray[i]);
+         if (dectectionJoin[0]===true){
+            if(options.debug){console.log(JSON.stringify(stepArray[i]));}
+         }
+         Accel.config({subscribe: true}); 
+         return(detectionJoin); 
+      }
+
    else{
       if(options.debug){console.log("On time out");}
       return[false,-1];
@@ -60,11 +77,46 @@ function arrayToFrames(e){
    return (frameArray);
 }
 
+//function to join to arrays together
+function joinFrames(current){
+   var maxLengthGes = 0;
+   if (cachedFrame === []){
+      if(options.debug){console.log("First FrameArray, no join needed");}
+   }
+   else{
+      //Create the stepped Array
+      var tempArray = []
+      for (var i=maxLengthGes-1; i>0; i--;){
+         // adding the frames from previous counting up to the end for the right order
+         for(var j=0; j>=i; j++){
+         tempArray.push(previous[previous.length-(i-j);]
+         }
+         //Adding the frames 
+         for(var j=maxLengthGes-1; j>=i; j++;){
+            tempArray.push(current[j-i]);
+         }
+         stepArray.push(tempArray);
+      }
+      if(options.debug){console.log("stepArray completetd");}
+   }
+
+}
+
+function maximumGestureLength(){
+   //find maximum length gesture
+   for (var i=0, gesLength = options.gestures.length-1; i<gesLength; i++){
+      if (options.gestures[i].length > maxLengthGes ){
+         maxLengthGes=gesture[i].length;
+      }
+   }
+}
+
 //function/algorithm that detects the gestures
-function detectGesture(frameArray){ 
-   for (var i=0, framelength = frameArray.length-1;  i<framelength; i++){
+function detectGesture(frameArray){
+
+   for (var i=0, framelength = frameArray.length-maxLengthGes;  i<framelength; i++){
       if ((frameArray[i][0].vibe === true)||(frameArray[i][0].vibe === true)){
-         if(options.debug){console.log("frame " + i + "failed" );}
+         if(options.de-bug){console.log("frame " + i + "failed" );}
       }
       else{
          //console.log("else");
