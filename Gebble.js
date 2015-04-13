@@ -11,7 +11,6 @@ var shake = [[{x:3000,y:3000,z:3000,name:"shake"},{x:100,y:100,z:100}],[{x:3000,
 var shakeX =[[{x:4000,y:4000,z:4000,name:"shakeX"},{x:1100,y:0,z:0}]];
 var shakeY =[[{x:4000,y:4000,z:4000,name:"shakeY"},{x:0,y:1100,z:0}]];
 var shakeZ =[[{x:4000,y:4000,z:4000,name:"shakeZ"},{x:0,y:0,z:1100}]];
-//var twist = [[{x:null,y:null,z:null},{x:80,y:550,z:80}],[{x:null,y:null,z:null},{x:60,y:550,z:80}]];
 var xMove = [[{x:1000,y:100,z:100,name:"XMove"},{x:150,y:0,z:0}],[{x:1000,y:100,z:100},{x:150,y:0,z:0}],[{x:1000,y:100,z:100},{x:150,y:0,z:0}]];//,[{x:1000,y:100,z:100},{x:150,y:0,z:0}]];
 var yMove = [[{x:100,y:1000,z:100,name:"YMove"},{x:0,y:150,z:0}],[{x:100,y:1000,z:100},{x:0,y:150,z:0}],[{x:100,y:1000,z:100},{x:0,y:150,z:0}]];//,[{x:100,y:1000,z:100},{x:0,y:150,z:0}]];
 var zMove = [[{x:100,y:100,z:1000,name:"ZMove"},{x:20,y:20,z:150}],[{x:50,y:50,z:1000},{x:30,y:30,z:150}],[{x:80,y:80,z:1000},{x:30,y:30,z:150}]];//,[{x:80,y:80,z:1000},{x:30,y:30,z:150}]];
@@ -103,6 +102,7 @@ function joinFrameArrays(current){
          }
          //push this loops array to the stepArray
          stepArray.push(tempArray);
+         //temp array cleard for the next loop
          tempArray =[];
       }
       if(options.debug){console.log("stepArray completeted");}
@@ -114,6 +114,7 @@ function maximumGestureLength(){
    //loop over the getures array only taking the biggest overall array size
    for (var i=0, gesLength = options.gestures.length-1; i<gesLength; i++){
       if (options.gestures[i].length > maxLengthGes ){
+         //take the largest gesture length
          maxLengthGes=gesture[i].length;
       }
    }
@@ -122,33 +123,41 @@ function maximumGestureLength(){
 //function/algorithm that detects the gestures
 function detectGesture(frameArray){ 
    for (var i=0, framelength = frameArray.length-maxLengthGes;  i<=framelength; i++){
+      //look at the vibration setting in the frame array
       if ((frameArray[i][0].vibe === true)||(frameArray[i][0].vibe === true)){
+         //debug mode ooption print outs
          if(options.debug){console.log("frame " + i + "failed" );}
       }
       else{
-         //console.log("else");
+         //iterate over the gesture
          for(var k=0, overall = options.gestures.length-1; k <= overall; k++){
+            //continue oover the frame array if a correct frame is detected
             for (var j=0, len = (options.gestures[k]).length-1; j <= len; j++){
+               //vomparing tolerances for x,y,z upper and lower values
                if (((Math.abs(frameArray[i+j][1].z-frameArray[i][0].z)>=options.gestures[k][j][1].z)&&
                 (Math.abs(frameArray[i+j][1].y-frameArray[i+j][0].y)>=options.gestures[k][j][1].y)&&
                 (Math.abs(frameArray[i+j][1].x-frameArray[i+j][0].x)>=options.gestures[k][j][1].x))&&
                 ((Math.abs(frameArray[i+j][0].z-frameArray[i+j][0].z)<=options.gestures[k][j][0].z)&&
                 (Math.abs(frameArray[i+j][0].y-frameArray[i+j][0].y)<=options.gestures[k][j][0].y)&&
                 (Math.abs(frameArray[i+j][0].x-frameArray[i+j][0].x)<=options.gestures[k][j][0].x))){
+                  //if on the last frame return value and print messages (if debug is enabled)
                   if (len === j){
                      if(options.debug){console.log("Last Dectection Frame: "+(i+j) );}
                      if(options.debug){console.log("Gesture Frame: "+j);}
                      if(options.debug){console.log("Detection on: " +options.gestures[k][0][0].name);}
-                     Accel.config({subscribe: false});                                       
+                     Accel.config({subscribe: false}); 
+                     //take the time of the first frame that was detected on                                      
                      timeOfFrame = frameArray[i][0].time;
                      return [true,k];
                   }
                   else{
+                     //printed when a frame has been evaluted as true
                      if(options.debug){console.log("Frame: "+(i+j) );}
                      if(options.debug){console.log("Gesture Frame: "+j);}
                   }
                }
                else{
+                  //next frame
                   i=i+j;
                   break;
                }
@@ -157,11 +166,13 @@ function detectGesture(frameArray){
          }
       }      
    }
+   //frame array has no gesture detected exit and return a false value
    return [false,-1] ;  
 }
+//export module methods
 module.exports = {
    init: init,
-   start: startDetection,
+   detect: startDetection,
    arrayToFrames: arrayToFrames,
-   detect: detectGesture   
+   processFrames: detectGesture   
 };
