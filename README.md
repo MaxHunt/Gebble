@@ -1,4 +1,6 @@
-# Gebble
+# Gebble.js
+
+Gebble.js is a library which helps developers implement gesture control into javascript applications using the Pebble smart watch and pebble.js. 
 
 ##1.	Setting up Gebble.js
 
