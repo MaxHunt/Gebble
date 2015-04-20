@@ -3,7 +3,7 @@
  *
  * Gesture Detection Libray
  * By Max Hunt - 609556
- * Date - 15/01/2015
+ * Latest Verison UpDate - 20/04/2015
  */
 
 //Gestures
@@ -46,19 +46,23 @@ function startDetection(e){
    if (timeOfFrame===0||frameArray[0][0].time - timeOfFrame >= options.delay){
       var detection = detectGesture(frameArray);
       var detectionJoin;
-      //dectection over the joining of the previous Arrays
-   
-      for ( var i=0; i<stepArray.length-1; i++){
-         detectionJoin = detectGesture(stepArray[i]);
+      //detection over the joining of the previous Arrays
+      //try catch is used on the first time of joining when no previous cached array exists
+      try{
+         for ( var i=0; i<stepArray.length-1; i++){
+            detectionJoin = detectGesture(stepArray[i]);
+            if (detectionJoin[0]===true){
+              if(options.debug){console.log(JSON.stringify(stepArray[i]));}
+               break;
+            }          
+         }       
+         Accel.config({subscribe: true});
          if (detectionJoin[0]===true){
-            if(options.debug){console.log(JSON.stringify(stepArray[i]));}
-            break;
-         }          
-      }
-      Accel.config({subscribe: true});
-      if (detectionJoin[0]===true){
-         return detectionJoin;
-      }
+            return detectionJoin;
+         }
+      }catch(arg){
+         if(options.debug){console.log("First Frame Array, no join needed");}
+      }    
       //dectection over the frame array
       if (detection[0]===true){
          if(options.debug){console.log(JSON.stringify(frameArray));}
@@ -85,7 +89,7 @@ function arrayToFrames(e){
 function joinFrameArrays(current){
    stepArray=[];
    //if there is no previous cached array, the first time the app is started this process is voided
-   if (cachedFrameArray === []){
+   if (cachedFrameArray === null){
       if(options.debug){console.log("First Frame Array, no join needed");}
    }
    else{
